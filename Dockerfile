@@ -15,5 +15,5 @@ COPY . .
 
 RUN mkdir -p pdfs
 
-# RailwayはPORTを動的に割り当てる
-CMD gunicorn app:app --bind "0.0.0.0:${PORT:-8080}" --workers 1 --timeout 120 --log-level debug
+# シェル形式でCMDを記述することで$PORT変数が展開される
+CMD ["/bin/sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 120 --log-level info"]
