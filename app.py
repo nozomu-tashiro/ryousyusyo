@@ -302,7 +302,10 @@ def export_history():
         download_name=f'receipt_history_{datetime.now().strftime("%Y%m%d")}.csv'
     )
 
+# gunicorn/Railway本番環境でも必ず初期化（モジュール読み込み時に実行）
+os.makedirs(PDF_DIR, exist_ok=True)
+init_db()
+print(f"[STARTUP] DB={DB_PATH}, PDF_DIR={PDF_DIR}", flush=True)
+
 if __name__ == '__main__':
-    os.makedirs('pdfs', exist_ok=True)
-    init_db()
     app.run(debug=False, host='0.0.0.0', port=5001)
