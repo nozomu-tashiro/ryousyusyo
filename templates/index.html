@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>領収書発行システム（再発行専用）</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ cache_bust }}"
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <header class="header" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>領収書発行システム</h1>
+            <a href="/logout" style="color:#fff; font-size:11px; text-decoration:none; border:1px solid rgba(255,255,255,0.5); padding:3px 10px; border-radius:2px;">ログアウト</a>
+        </header>
+
+        <!-- 発行者氏名 -->
+        <div style="background:#fff; border:1px solid #ccc; border-left:4px solid #1565C0; border-radius:3px; padding:10px 16px; margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+            <label for="issuerName" style="font-size:12px; font-weight:bold; color:#1565C0; white-space:nowrap;">発行者氏名 <span style="color:#c00;">必須</span></label>
+            <input type="text" id="issuerName" placeholder="例：田中 花子" class="form-control" style="max-width:220px; margin:0;">
+            <span style="font-size:11px; color:#888;">発行履歴に記録されます</span>
+        </div>
+
+        <!-- 発行前確認パネル -->
+        <div class="pre-check-panel">
+
+            <!-- 確認チェックリスト -->
+            <div class="pre-check-block">
+                <div class="pre-check-title">発行前の確認事項</div>
+
+                <div class="evidence-note">
+                    下記の書類は、税務上も有効な支払証明となります。まずはご案内ください。
+                    <div class="evidence-list">
+                        <span class="evidence-item">契約書お客様控え（領収書を含む）</span>
+                        <span class="evidence-sep">/</span>
+                        <span class="evidence-item">口座振替明細書</span>
+                        <span class="evidence-sep">/</span>
+                        <span class="evidence-item">振込明細書</span>
+                    </div>
+                </div>
+
+                <div class="pre-check-list">
+                    <div class="pre-check-item">1. 基幹システムにて、対象費目の入金が確認できていますか？</div>
+                    <div class="pre-check-item">2. 契約者様へ上記の支払証明書類をご案内しましたか？</div>
+                    <div class="pre-check-item">3. 上記書類での対応が困難な理由を確認しましたか？</div>
+                </div>
+                <div class="pre-check-note">上記3点を確認のうえ、発行が必要と判断した場合にのみ、このシステムをご使用ください。</div>
+            </div>
+
+            <!-- 発行対象種別 -->
+            <div class="pre-check-block">
+                <div class="pre-check-title">発行対象の領収書種別</div>
+                <div class="receipt-type-grid">
+                    <div class="receipt-type-row">
+                        <span class="tax-badge nontax">非課税</span>
+                        <span class="receipt-type-items">更新保証料　／　月額保証料　／　初回保証料</span>
+                    </div>
+                    <div class="receipt-type-row">
+                        <span class="tax-badge taxable">課　税</span>
+                        <span class="receipt-type-items">集送金手数料　／　請求事務手数料</span>
+                        <span class="invoice-note">適格請求書対応</span>
+                    </div>
+                </div>
+                <div class="pre-check-note">初回保証料は、例外的な対応が必要と判断した場合に限り発行可とします。<br>課税項目は、相手方が事業者でインボイスの交付を求める場合にご対応ください。</div>
+            </div>
+
+            <!-- 再発行表記の理由（折りたたみ） -->
+            <div class="reissue-accordion">
+                <button type="button" class="reissue-accordion-btn"
+                    onclick="
+                        var body = document.getElementById('reissueNote');
+                        var arrow = document.getElementById('reissueArrow');
+                        if (body.style.display === 'none') {
+                            body.style.display = 'block';
+                            arrow.textContent = '▲ 閉じる';
+                        } else {
+                            body.style.display = 'none';
+                            arrow.textContent = '▼ 詳細を見る';
+                        }
+                    ">
+                    <span>領収書に「再発行」と記載される理由</span>
+                    <span id="reissueArrow" class="reissue-arrow">▼ 詳細を見る</span>
+                </button>
+                <div id="reissueNote" class="reissue-accordion-body" style="display:none;">
+                    <div class="reissue-qa">
+                        <div class="reissue-q">Q. なぜ「再発行」と記載されているのですか？</div>
+                        <div class="reissue-a">
+                            契約書お客様控え・口座振替履歴明細・振込明細書は、<strong>税務上も有効な支払証明書類</strong>です。<br>
+                            そのため、通常これらの書類が領収書の代わりとなります。<br><br>
+                            加えて、ご契約時にお渡しした「契約書お客様控え」には、<strong>すでに領収書が含まれています</strong>（これが原本です）。<br><br>
+                            今回ご発行するのは、その原本に対する「2通目」にあたります。<br>
+                            法令の定めにより、同一取引に対して複数の領収書を発行する場合は<strong>「再発行」と明記する義務</strong>があります。<br>
+                            二重発行ではなく、正規の手続きです。
+                        </div>
+                    </div>
+                    <div class="reissue-qa">
+                        <div class="reissue-q">Q. 確定申告に使用できますか？</div>
+                        <div class="reissue-a">
+                            はい、ご利用いただけます。「再発行」の記載があっても、領収書としての効力は通常のものと同一です。<br>
+                            なお、口座振替履歴明細・振込明細書も税務上の支払証明として有効ですので、そちらもあわせてご案内ください。
+                        </div>
+                    </div>
+                    <div class="reissue-qa">
+                        <div class="reissue-q">Q. 適格請求書（インボイス）として使用できますか？</div>
+                        <div class="reissue-a">集送金手数料・請求事務手数料（課税項目）はインボイス対応での発行が可能です。保証料（非課税項目）はインボイスの対象外となります。</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- STEP 1: 契約者情報 -->
+        <div class="section">
+            <h2>📋 STEP 1: 契約者情報の入力</h2>
+            
+            <div class="form-group">
+                <label for="customerName">
+                    契約者名 <span class="required">必須</span>
+                    <span class="hint">💡基幹システムと完全一致で入力</span>
+                </label>
+                <input type="text" id="customerName" placeholder="山田 太郎" class="form-control">
+                <small>※姓名の間は全角スペース</small>
+            </div>
+
+            <div class="form-group">
+                <label for="guaranteeNumber">
+                    保証番号 <span class="optional">任意</span>
+                    <span class="hint">💡履歴管理用・入力推奨</span>
+                </label>
+                <input type="text" id="guaranteeNumber" placeholder="H-2024-001234" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="postalCode">
+                    郵便番号 <span class="required">必須</span>
+                    <span class="hint">💡ハイフンあり/なしどちらでもOK</span>
+                </label>
+                <input type="text" id="postalCode" placeholder="123-4567" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="address">
+                    住所 <span class="required">必須</span>
+                    <span class="hint">💡都道府県から番地まで</span>
+                </label>
+                <input type="text" id="address" placeholder="東京都渋谷区代々木1-2-3" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="buildingRoom">
+                    物件名・号室 <span class="optional">任意</span>
+                    <span class="hint">💡建物名と部屋番号</span>
+                </label>
+                <input type="text" id="buildingRoom" placeholder="ハイツ代々木101号室" class="form-control">
+            </div>
+        </div>
+
+        <!-- STEP 2: 領収内容 -->
+        <div class="section">
+            <h2>💰 STEP 2: 領収内容の選択と金額入力</h2>
+            <p class="warning-text">⚠️ 注意：入金確認済みの項目のみチェックしてください</p>
+
+            <h3 class="subsection-title">━━━ 非課税項目（保証料） ━━━</h3>
+
+            <!-- 初回保証料 -->
+            <div class="item-group">
+                <div class="item-header">
+                    <input type="checkbox" id="checkInitial" class="item-checkbox">
+                    <label for="checkInitial">初回保証料 <span class="badge badge-nontax">非課税</span></label>
+                </div>
+                <div class="item-body" id="bodyInitial" style="display:none;">
+                    <div class="form-row">
+                        <label>金額:</label>
+                        <input type="number" id="amountInitial" class="amount-input" placeholder="0">
+                        <span>円</span>
+                        <span class="alert-inline">⚠️ 原則発行しません！契約書2枚目を案内</span>
+                    </div>
+                    <div class="form-row">
+                        <label>領収日:</label>
+                        <input type="date" id="receiptDateInitial" class="form-control" style="width:150px;">
+                        <span class="hint-inline">💡 入金確認日</span>
+                    </div>
+                    <small>💡 どうしてもの場合のみ・入金後に発行</small>
+                </div>
+            </div>
+
+            <!-- 月額保証料 -->
+            <div class="item-group">
+                <div class="item-header">
+                    <input type="checkbox" id="checkMonthly" class="item-checkbox">
+                    <label for="checkMonthly">月額保証料 <span class="badge badge-nontax">非課税</span></label>
+                </div>
+                <div class="item-body" id="bodyMonthly" style="display:none;">
+                    <div class="form-row">
+                        <label>金額:</label>
+                        <input type="number" id="amountMonthly" class="amount-input" placeholder="0" oninput="calcMonthly()">
+                        <span>円</span>
+                    </div>
+                    <div class="form-row">
+                        <label>対象期間:</label>
+                        <input type="number" id="monthlyStartYear" class="year-input" placeholder="2024" min="2020" max="2030" oninput="calcMonthly()">
+                        <span>年</span>
+                        <input type="number" id="monthlyStartMonth" class="month-input" placeholder="04" min="1" max="12" oninput="calcMonthly()">
+                        <span>月 ～</span>
+                        <input type="number" id="monthlyEndYear" class="year-input" placeholder="2024" min="2020" max="2030" oninput="calcMonthly()">
+                        <span>年</span>
+                        <input type="number" id="monthlyEndMonth" class="month-input" placeholder="09" min="1" max="12" oninput="calcMonthly()">
+                        <span>月</span>
+                    </div>
+                    <div class="calc-formula" id="calcMonthlyResult">
+                        <span class="calc-label">×</span>
+                        <span class="calc-box" id="monthlyMonths">―</span>
+                        <span class="calc-label">カ月　＝　</span>
+                        <span class="calc-box calc-total" id="monthlyTotal">―</span>
+                        <span class="calc-label">円</span>
+                    </div>
+                    <div class="form-row">
+                        <label>領収開始日:</label>
+                        <input type="date" id="receiptDateMonthlyStart" class="form-control" style="width:150px;">
+                        <span>～</span>
+                        <label>領収終了日:</label>
+                        <input type="date" id="receiptDateMonthlyEnd" class="form-control" style="width:150px;">
+                    </div>
+                    <small>💡 領収期間を指定してください</small>
+                    <small>💡 複数月選択で自動的に明細書を作成します</small>
+                </div>
+            </div>
+
+            <!-- 更新保証料 -->
+            <div class="item-group">
+                <div class="item-header">
+                    <input type="checkbox" id="checkRenewal" class="item-checkbox">
+                    <label for="checkRenewal">更新保証料 <span class="badge badge-nontax">非課税</span></label>
+                </div>
+                <div class="item-body" id="bodyRenewal" style="display:none;">
+                    <div class="form-row">
+                        <label>金額:</label>
+                        <input type="number" id="amountRenewal" class="amount-input" placeholder="0">
+                        <span>円</span>
+                    </div>
+                    <div class="form-row">
+                        <label>領収日:</label>
+                        <input type="date" id="receiptDateRenewal" class="form-control" style="width:150px;">
+                        <span class="hint-inline">💡 入金確認日</span>
+                    </div>
+                    <small>💡 生活保護の方からの依頼が多いです</small>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">━━━ 課税項目（消費税10%） ━━━</h3>
+
+            <!-- 集送金手数料 -->
+            <div class="item-group">
+                <div class="item-header">
+                    <input type="checkbox" id="checkCollection" class="item-checkbox">
+                    <label for="checkCollection">集送金手数料 <span class="badge badge-tax">課税10%</span></label>
+                </div>
+                <div class="item-body" id="bodyCollection" style="display:none;">
+                    <div class="form-row">
+                        <label>金額:</label>
+                        <input type="number" id="amountCollection" class="amount-input" placeholder="0" oninput="calcCollection()">
+                        <span>円 (税込)</span>
+                    </div>
+                    <div class="form-row">
+                        <label>対象期間:</label>
+                        <input type="number" id="collectionStartYear" class="year-input" placeholder="2024" min="2020" max="2030" oninput="calcCollection()">
+                        <span>年</span>
+                        <input type="number" id="collectionStartMonth" class="month-input" placeholder="04" min="1" max="12" oninput="calcCollection()">
+                        <span>月 ～</span>
+                        <input type="number" id="collectionEndYear" class="year-input" placeholder="2024" min="2020" max="2030" oninput="calcCollection()">
+                        <span>年</span>
+                        <input type="number" id="collectionEndMonth" class="month-input" placeholder="09" min="1" max="12" oninput="calcCollection()">
+                        <span>月</span>
+                    </div>
+                    <div class="calc-formula" id="calcCollectionResult">
+                        <span class="calc-label">×</span>
+                        <span class="calc-box" id="collectionMonths">―</span>
+                        <span class="calc-label">カ月　＝　</span>
+                        <span class="calc-box calc-total" id="collectionTotal">―</span>
+                        <span class="calc-label">円（税込）</span>
+                    </div>
+                    <div class="form-row">
+                        <label>領収開始日:</label>
+                        <input type="date" id="receiptDateCollectionStart" class="form-control" style="width:150px;">
+                        <span>～</span>
+                        <label>領収終了日:</label>
+                        <input type="date" id="receiptDateCollectionEnd" class="form-control" style="width:150px;">
+                    </div>
+                    <small>💡 領収期間を指定してください</small>
+                    <small>💡 複数月の場合は期間を入力（単月の場合は不要）</small>
+                </div>
+            </div>
+
+            <!-- 請求事務手数料 -->
+            <div class="item-group">
+                <div class="item-header">
+                    <input type="checkbox" id="checkBilling" class="item-checkbox">
+                    <label for="checkBilling">請求事務手数料 <span class="badge badge-tax">課税10%</span></label>
+                </div>
+                <div class="item-body" id="bodyBilling" style="display:none;">
+                    <div class="form-row">
+                        <label>金額:</label>
+                        <input type="number" id="amountBilling" class="amount-input" placeholder="0" oninput="calcBilling()">
+                        <span>円 (税込)</span>
+                    </div>
+                    <div class="form-row">
+                        <label>対象期間:</label>
+                        <input type="number" id="billingStartYear" class="year-input" placeholder="2024" min="2020" max="2030" oninput="calcBilling()">
+                        <span>年</span>
+                        <input type="number" id="billingStartMonth" class="month-input" placeholder="04" min="1" max="12" oninput="calcBilling()">
+                        <span>月 ～</span>
+                        <input type="number" id="billingEndYear" class="year-input" placeholder="2024" min="2020" max="2030" oninput="calcBilling()">
+                        <span>年</span>
+                        <input type="number" id="billingEndMonth" class="month-input" placeholder="09" min="1" max="12" oninput="calcBilling()">
+                        <span>月</span>
+                    </div>
+                    <div class="calc-formula" id="calcBillingResult">
+                        <span class="calc-label">×</span>
+                        <span class="calc-box" id="billingMonths">―</span>
+                        <span class="calc-label">カ月　＝　</span>
+                        <span class="calc-box calc-total" id="billingTotal">―</span>
+                        <span class="calc-label">円（税込）</span>
+                    </div>
+                    <div class="form-row">
+                        <label>領収開始日:</label>
+                        <input type="date" id="receiptDateBillingStart" class="form-control" style="width:150px;">
+                        <span>～</span>
+                        <label>領収終了日:</label>
+                        <input type="date" id="receiptDateBillingEnd" class="form-control" style="width:150px;">
+                    </div>
+                    <small>💡 領収期間を指定してください</small>
+                </div>
+            </div>
+
+            <!-- 合計表示 -->
+            <div class="total-box">
+                <h3>【自動計算】</h3>
+                <div class="total-row">
+                    <span>非課税額:</span>
+                    <span id="totalNontax">0</span>
+                    <span>円</span>
+                </div>
+                <div class="total-row">
+                    <span>課税額(本体):</span>
+                    <span id="totalTaxBase">0</span>
+                    <span>円</span>
+                </div>
+                <div class="total-row">
+                    <span>消費税(10%):</span>
+                    <span id="totalTax">0</span>
+                    <span>円</span>
+                </div>
+                <div class="total-row total-main">
+                    <span>合計金額:</span>
+                    <span id="totalAmount">0</span>
+                    <span>円</span>
+                </div>
+            </div>
+            <p class="hint-text">💡 課税項目を選択すると、消費税が自動計算されます</p>
+        </div>
+
+        <!-- STEP 3: 発行設定 -->
+        <div class="section">
+            <h2>⚙️ STEP 3: 発行設定</h2>
+
+            <div class="form-group">
+                <label>発行形式</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="receiptType" value="normal" checked>
+                        通常の領収書 (再発行) <span class="hint">💡 個人のお客様向け</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="receiptType" value="invoice">
+                        適格請求書 (インボイス) <span class="hint">💡 事業者のお客様向け</span>
+                    </label>
+                </div>
+                <p class="warning-text">⚠️ 課税項目を選択している場合は「適格請求書」を推奨</p>
+            </div>
+
+            <div class="form-group">
+                <label>但し書き</label>
+                <div class="note-preset-group">
+                    <label class="note-preset-label">
+                        <input type="radio" name="notePreset" value="家賃保証料として" checked
+                            onchange="document.getElementById('customNote').value='';">
+                        家賃保証料として
+                    </label>
+                    <label class="note-preset-label">
+                        <input type="radio" name="notePreset" value="更新保証料として"
+                            onchange="document.getElementById('customNote').value='';">
+                        更新保証料として
+                    </label>
+                    <label class="note-preset-label">
+                        <input type="radio" name="notePreset" value="月額保証料として"
+                            onchange="document.getElementById('customNote').value='';">
+                        月額保証料として
+                    </label>
+                    <label class="note-preset-label">
+                        <input type="radio" name="notePreset" value="家賃保証料等として"
+                            onchange="document.getElementById('customNote').value='';">
+                        家賃保証料等として
+                    </label>
+                    <label class="note-preset-label">
+                        <input type="radio" name="notePreset" value="custom">
+                        自由入力 ↓
+                    </label>
+                </div>
+                <input type="text" id="customNote" class="form-control" 
+                    placeholder="自由入力を選択して、ここに文言を入力してください"
+                    style="margin-top:6px;"
+                    onfocus="document.querySelector('input[name=notePreset][value=custom]').checked=true;">
+            </div>
+
+            <div class="form-group">
+                <label for="issueDate">
+                    発行日
+                    <span class="hint">💡 通常は今日の日付</span>
+                </label>
+                <input type="date" id="issueDate" class="form-control">
+                <button type="button" class="btn btn-secondary" onclick="setToday()">今日</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: プレビューと出力 -->
+        <div class="section">
+            <h2>📤 STEP 4: プレビュー確認と出力</h2>
+
+            <button type="button" class="btn btn-primary btn-large" onclick="showPreview()">
+                📄 プレビューを表示
+            </button>
+
+            <div class="alert alert-info" style="margin-top: 20px;">
+                <h4>⚠️ プレビューで以下を必ず確認してください</h4>
+                <ul>
+                    <li>✅ 契約者名に誤字がないか</li>
+                    <li>✅ 住所が正確か</li>
+                    <li>✅ 金額が正しいか</li>
+                    <li>✅ 「再発行」の表記があるか</li>
+                </ul>
+            </div>
+
+            <div id="outputButtons" style="display:none; margin-top: 20px;">
+                <h3>確認後、出力方法を選択:</h3>
+                
+                <button type="button" class="btn btn-success" onclick="downloadPDF()">
+                    🖨️ 印刷して郵送
+                </button>
+                <span class="hint">💡 生活保護の方など</span>
+
+                <div style="margin-top: 15px;">
+                    <button type="button" class="btn btn-success" onclick="showEmailForm()">
+                        📧 メールで送信
+                    </button>
+                    <span class="hint">💡 メールアドレスがわかる場合</span>
+                </div>
+
+                <div id="emailForm" style="display:none; margin-top: 10px; margin-left: 0px;">
+                    <div style="background:#f0f4fa; border:1px solid #c5d3e8; border-radius:4px; padding:14px 16px; max-width:620px;">
+                        <div style="margin-bottom:8px; font-size:12px; color:#444; background:#fffbe6; border:1px solid #ffe082; border-radius:3px; padding:7px 10px;">
+                            📌 ボタンを押すと <strong>PDFが自動ダウンロード</strong> され、同時に <strong>メーラーが起動</strong>（件名・本文入力済み）します。<br>
+                            　　ダウンロードされたPDFをメーラーに添付して送信してください。
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                            <label style="font-size:12px; white-space:nowrap; min-width:80px;">宛先メール</label>
+                            <input type="email" id="emailAddress" placeholder="yamada@example.com" class="form-control" style="flex:1; max-width:280px;">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                            <label style="font-size:12px; white-space:nowrap; min-width:80px;">件名</label>
+                            <input type="text" id="emailSubject" class="form-control" style="flex:1;" value="領収書のご送付について（株式会社いえらぶパートナーズ）">
+                        </div>
+                        <div style="margin-bottom:8px;">
+                            <label style="font-size:12px; display:block; margin-bottom:4px;">本文（送信前に編集可能）</label>
+                            <textarea id="emailBody" class="form-control" rows="10" style="font-size:12px; line-height:1.6; font-family:inherit;"></textarea>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-primary" onclick="openMailer()" style="font-size:12px;">
+                                📨 メーラーで開く（Outlook等）
+                            </button>
+                            <button type="button" onclick="document.getElementById('emailForm').style.display='none'" style="font-size:12px; padding:5px 12px; background:#e0e0e0; border:1px solid #bbb; border-radius:3px; cursor:pointer;">
+                                閉じる
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <button type="button" class="btn btn-success" onclick="downloadPDF()">
+                        💾 PDFダウンロード
+                    </button>
+                    <span class="hint">💡 お客様に手渡す場合など</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 発行履歴 -->
+        <div class="section">
+            <h2>📊 発行履歴 (直近10件)</h2>
+            <div id="historyList" class="history-list">
+                <!-- JavaScriptで動的に生成 -->
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="exportHistory()">
+                📥 全履歴をCSVダウンロード
+            </button>
+            <span class="hint">💡 月次報告などに使用</span>
+        </div>
+
+        <!-- ヘルプボタン -->
+        <div class="help-button">
+            <button type="button" class="btn btn-info" onclick="showHelp()">❓ ヘルプ</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}?v={{ cache_bust }}"></script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.colors import HexColor
+from reportlab.lib.utils import ImageReader
+import os
+from datetime import datetime
+
+# Railway永続ボリューム or ローカルディレクトリ
+_DATA_DIR = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH', os.path.dirname(os.path.abspath(__file__)))
+_PDF_DIR  = os.path.join(_DATA_DIR, 'pdfs')
+
+# 日本語フォントの登録
+def register_fonts():
+    try:
+        pdfmetrics.registerFont(TTFont('IPAGothic', '/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf'))
+        pdfmetrics.registerFont(TTFont('IPAMincho', '/usr/share/fonts/opentype/ipafont-mincho/ipam.ttf'))
+        return True
+    except:
+        try:
+            pdfmetrics.registerFont(TTFont('Japanese', '/usr/share/fonts/truetype/fonts-japanese-gothic.ttf'))
+            return True
+        except:
+            return False
+
+def format_currency(amount):
+    """金額をカンマ区切りでフォーマット"""
+    return f"{amount:,}"
+
+def generate_receipt_pdf(data):
+    """領収書PDFを生成"""
+    
+    # フォント登録
+    font_available = register_fonts()
+    font_name = 'IPAGothic' if font_available else 'Helvetica'
+    
+    # PDFファイル名
+    receipt_number = data['receipt_number']
+    filename = f"receipt_{receipt_number}.pdf"
+    os.makedirs(_PDF_DIR, exist_ok=True)
+    filepath = os.path.join(_PDF_DIR, filename)
+    
+    # PDF作成
+    c = canvas.Canvas(filepath, pagesize=A4)
+    width, height = A4
+    
+    # 色定義
+    blue_color = HexColor('#1565C0')
+    gray_color = HexColor('#666666')
+    light_gray = HexColor('#F5F5F5')
+    
+    # === ヘッダー部分 ===
+    # 会社ロゴ（左上）- 新しいデザイン
+    logo_path = 'static/images/ierabu_logo_new.png'
+    if os.path.exists(logo_path):
+        c.drawImage(logo_path, 20*mm, height - 25*mm, width=60*mm, height=12*mm, preserveAspectRatio=True, mask='auto')
+    
+    # 会社情報（右上）
+    c.setFont(font_name, 8)
+    c.setFillColor(gray_color)
+    y_pos = height - 15*mm
+    c.drawRightString(width - 15*mm, y_pos, "株式会社いえらぶパートナーズ")
+    y_pos -= 3.5*mm
+    c.drawRightString(width - 15*mm, y_pos, "〒163-0248 東京都新宿区西新宿2-6-1 新宿住友ビル48階")
+    y_pos -= 3.5*mm
+    c.drawRightString(width - 15*mm, y_pos, "TEL: 03-6240-3362")
+    
+    # === タイトル ===
+    c.setFillColor(blue_color)
+    c.setFont(font_name, 20)
+    title = "領収書（再発行）" if data['receipt_type'] == 'normal' else "適格請求書（再発行）"
+    c.drawString(20*mm, height - 40*mm, title)
+    
+    # タイトル下線
+    c.setStrokeColor(blue_color)
+    c.setLineWidth(2)
+    c.line(20*mm, height - 42*mm, 85*mm, height - 42*mm)
+    
+    # === 領収書番号と発行日 ===
+    c.setFillColor(gray_color)
+    c.setFont(font_name, 9)
+    y_pos = height - 50*mm
+    c.drawString(20*mm, y_pos, f"No. {receipt_number}")
+    c.drawRightString(width - 15*mm, y_pos, f"再発行日: {data['issue_date']}")
+    
+    # === 宛名 ===
+    y_pos -= 8*mm
+    c.setFillColor(HexColor('#000000'))
+    c.setFont(font_name, 13)
+    c.drawString(20*mm, y_pos, f"{data['customer_name']} 様")
+    
+    # 住所情報
+    y_pos -= 6*mm
+    c.setFont(font_name, 9)
+    c.drawString(20*mm, y_pos, f"〒{data['postal_code']}")
+    y_pos -= 4*mm
+    c.drawString(20*mm, y_pos, data['address'])
+    
+    if data.get('building_room'):
+        y_pos -= 4*mm
+        c.drawString(20*mm, y_pos, data['building_room'])
+    
+    # 保証番号
+    if data.get('guarantee_number'):
+        y_pos -= 5*mm
+        c.setFillColor(gray_color)
+        c.setFont(font_name, 8)
+        c.drawString(20*mm, y_pos, f"保証番号: {data['guarantee_number']}")
+    
+    # === 領収文 ===
+    y_pos -= 8*mm
+    c.setFillColor(HexColor('#000000'))
+    c.setFont(font_name, 10)
+    c.drawString(20*mm, y_pos, "下記の通り領収いたしました。")
+    
+    # === 金額ボックス（目立つデザイン） ===
+    y_pos -= 12*mm
+    
+    # 背景ボックス
+    c.setFillColor(light_gray)
+    c.setStrokeColor(blue_color)
+    c.setLineWidth(1.5)
+    c.rect(20*mm, y_pos - 10*mm, width - 40*mm, 12*mm, fill=1, stroke=1)
+    
+    # 金額テキスト
+    c.setFillColor(HexColor('#000000'))
+    c.setFont(font_name, 18)
+    total_text = f"金   {format_currency(data['total_amount'])}円"
+    c.drawCentredString(width / 2, y_pos - 5*mm, total_text)
+    
+    # 消費税表示
+    if data['tax_amount'] > 0:
+        c.setFont(font_name, 10)
+        c.setFillColor(gray_color)
+        tax_text = f"(うち消費税等 {format_currency(data['tax_amount'])}円)"
+        c.drawCentredString(width / 2, y_pos - 8.5*mm, tax_text)
+    
+    # === 但し書き ===
+    y_pos -= 18*mm
+    c.setFillColor(HexColor('#000000'))
+    c.setFont(font_name, 10)
+    c.drawString(20*mm, y_pos, f"但し、{data.get('note', '家賃保証料として')}")
+    
+    # === 内訳明細 ===
+    y_pos -= 10*mm
+    
+    # 明細ヘッダー（背景付き）
+    c.setFillColor(HexColor('#E3F2FD'))
+    c.rect(20*mm, y_pos - 5*mm, width - 40*mm, 6*mm, fill=1, stroke=0)
+    
+    c.setFillColor(blue_color)
+    c.setFont(font_name, 10)
+    c.drawString(22*mm, y_pos - 2*mm, "【内訳明細】")
+    
+    y_pos -= 10*mm
+    c.setFillColor(HexColor('#000000'))
+    c.setFont(font_name, 9)
+    
+    for item in data['items']:
+        if item['amount'] == 0:
+            continue
+        
+        # 項目名（領収日を追加）
+        item_name = f" {item['name']}"
+        if item.get('receipt_date_start') and item.get('receipt_date_end'):
+            # 期間表示
+            item_name += f"（領収日: {item['receipt_date_start']}～{item['receipt_date_end']}）"
+        elif item.get('receipt_date'):
+            # 単一日付
+            item_name += f"（領収日: {item['receipt_date']}）"
+        
+        # 期間がある場合（まとめて表示：パターンA+B）
+        if item.get('details') and len(item['details']) > 0:
+            y_pos -= 4*mm
+            c.setFont(font_name, 9)
+            c.drawString(22*mm, y_pos, item_name)
+            
+            # 期間範囲を取得
+            first_period = item['details'][0]['period']
+            last_period = item['details'][-1]['period']
+            month_count = len(item['details'])
+            
+            # 単価を計算
+            unit_price = item['details'][0]['amount']
+            
+            # まとめて1行で表示
+            y_pos -= 3.5*mm
+            c.setFont(font_name, 8)
+            period_text = f"  {first_period}分～{last_period}分  @{format_currency(unit_price)}円 × {month_count}ヶ月"
+            c.drawString(25*mm, y_pos, period_text)
+            
+            amount_text = f"{format_currency(item['amount'])}円"
+            if not item.get('is_taxable'):
+                amount_text += " ※非課税"
+            c.drawRightString(width - 17*mm, y_pos, amount_text)
+            
+            # 課税項目の場合は税額表示
+            if item.get('is_taxable'):
+                base_amount = round(item["amount"] * 10 // 11)
+                tax = item['amount'] - base_amount
+                y_pos -= 3*mm
+                c.setFillColor(gray_color)
+                c.drawString(27*mm, y_pos, f"   (本体 {format_currency(base_amount)}円 / 消費税 {format_currency(tax)}円)")
+                c.setFillColor(HexColor('#000000'))
+        else:
+            # 単一項目
+            y_pos -= 4*mm
+            c.setFont(font_name, 9)
+            c.drawString(22*mm, y_pos, item_name)
+            
+            amount_text = f"{format_currency(item['amount'])}円"
+            if not item.get('is_taxable'):
+                amount_text += " ※非課税"
+            c.drawRightString(width - 17*mm, y_pos, amount_text)
+            
+            if item.get('is_taxable'):
+                base_amount = round(item["amount"] * 10 // 11)
+                tax = item['amount'] - base_amount
+                y_pos -= 3*mm
+                c.setFont(font_name, 8)
+                c.setFillColor(gray_color)
+                c.drawString(25*mm, y_pos, f"(本体 {format_currency(base_amount)}円 / 消費税 {format_currency(tax)}円)")
+                c.setFillColor(HexColor('#000000'))
+        
+        y_pos -= 2*mm
+    
+    # === 消費税額サマリー ===
+    if data['tax_amount'] > 0:
+        y_pos -= 6*mm
+        
+        # 背景ボックス
+        c.setFillColor(HexColor('#FFF3E0'))
+        c.rect(20*mm, y_pos - 9*mm, width - 40*mm, 10*mm, fill=1, stroke=0)
+        
+        c.setFillColor(HexColor('#000000'))
+        c.setFont(font_name, 9)
+        c.drawString(22*mm, y_pos - 2*mm, "【消費税額】")
+        
+        y_pos -= 5*mm
+        base_amount = data['total_amount'] - data['tax_excluded_amount'] - data['tax_amount']
+        c.setFont(font_name, 8)
+        c.drawString(24*mm, y_pos, f"10%対象")
+        c.drawString(50*mm, y_pos, f"本体価格 {format_currency(base_amount):>10}円")
+        c.drawString(100*mm, y_pos, f"消費税 {format_currency(data['tax_amount']):>10}円")
+        
+        if data['tax_excluded_amount'] > 0:
+            y_pos -= 3.5*mm
+            c.drawString(24*mm, y_pos, f"非課税対象")
+            c.drawString(100*mm, y_pos, f"{format_currency(data['tax_excluded_amount']):>10}円")
+    
+    # === フッター（注記） ===
+    y_pos -= 15*mm
+    
+    # 区切り線
+    c.setStrokeColor(gray_color)
+    c.setLineWidth(0.5)
+    c.line(20*mm, y_pos, width - 15*mm, y_pos)
+    
+    y_pos -= 5*mm
+    c.setFont(font_name, 8)
+    c.setFillColor(gray_color)
+    c.drawString(20*mm, y_pos, "※この領収書は再発行です。原本は保証契約書お客様控えに含まれております。")
+    
+    # T番号（適格請求書番号）- 課税項目がある場合は常に表示
+    has_taxable = any(item.get('is_taxable') for item in data['items'])
+    if data['receipt_type'] == 'invoice' or has_taxable:
+        y_pos -= 4*mm
+        c.drawString(20*mm, y_pos, "※適格請求書発行事業者  登録番号: T7040001098239")
+    
+    # === 最下部会社情報 ===
+    y_pos = 25*mm
+    c.setFont(font_name, 8)
+    c.setFillColor(gray_color)
+    c.drawCentredString(width / 2, y_pos, "株式会社いえらぶパートナーズ  〒163-0248 東京都新宿区西新宿2-6-1 新宿住友ビル48階  TEL: 03-6240-3362")
+    
+    # T番号を常に表示（課税項目がある場合）
+    if data['receipt_type'] == 'invoice' or has_taxable:
+        y_pos -= 3.5*mm
+        c.drawCentredString(width / 2, y_pos, "適格請求書発行事業者登録番号: T7040001098239")
+    
+    # === 外枠 ===
+    c.setStrokeColor(gray_color)
+    c.setLineWidth(0.5)
+    c.rect(15*mm, 20*mm, width - 30*mm, height - 30*mm, fill=0, stroke=1)
+    
+    c.save()
+    
+    return filename

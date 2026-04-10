@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - 領収書発行システム</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ cache_bust }}">
+    <style>
+        .login-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e8e8e8;
+        }
+        .login-box {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 36px 40px 32px;
+            width: 380px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-logo img {
+            height: 36px;
+        }
+        .login-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1565C0;
+            text-align: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #1565C0;
+            padding-bottom: 10px;
+        }
+        .login-group {
+            margin-bottom: 14px;
+        }
+        .login-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 4px;
+        }
+        .login-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #bbb;
+            border-radius: 2px;
+            font-size: 13px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .login-group input:focus {
+            outline: none;
+            border-color: #1565C0;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background: #1565C0;
+            color: #fff;
+            border: none;
+            border-radius: 2px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            font-family: inherit;
+        }
+        .login-btn:hover {
+            background: #0d47a1;
+        }
+        .login-error {
+            background: #fff3f3;
+            border: 1px solid #f44336;
+            color: #c62828;
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 2px;
+            margin-bottom: 14px;
+        }
+        .login-note {
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+            margin-top: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="login-box">
+            <div class="login-logo">
+                <img src="{{ url_for('static', filename='images/ierabu_logo_new.png') }}" alt="いえらぶパートナーズ">
+            </div>
+            <div class="login-title">領収書発行システム</div>
+
+            {% if error %}
+            <div class="login-error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="/login">
+                <div class="login-group">
+                    <label for="login_id">ID（メールアドレス）</label>
+                    <input type="text" id="login_id" name="login_id" autocomplete="username">
+                </div>
+                <div class="login-group">
+                    <label for="login_pass">パスワード</label>
+                    <input type="password" id="login_pass" name="login_pass" autocomplete="current-password"
+                           placeholder="パスワードを入力">
+                </div>
+                <button type="submit" class="login-btn">ログイン</button>
+            </form>
+
+            <div class="login-note">
+                株式会社いえらぶパートナーズ 社内専用システム<br>
+                ID・パスワードは管理部門にお問い合わせください
+            </div>
+        </div>
+    </div>
+</body>
+</html>

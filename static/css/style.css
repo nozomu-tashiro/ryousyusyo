@@ -1,0 +1,935 @@
+/* 基本スタイル - システムライク */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'メイリオ', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'MS PGothic', sans-serif;
+    background-color: #e8e8e8;
+    color: #222;
+    line-height: 1.4;
+    font-size: 13px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+/* ヘッダー - コンパクト */
+.header {
+    background-color: #1565C0;
+    color: white;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+    border-radius: 3px;
+}
+
+.header h1 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* ===== 発行前確認パネル ===== */
+.pre-check-panel {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pre-check-block {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 12px 16px;
+}
+
+.pre-check-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #1565C0;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 7px;
+    margin-bottom: 10px;
+}
+
+.pre-check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+
+.pre-check-item {
+    font-size: 12px;
+    color: #333;
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.5;
+}
+.pre-check-item::before {
+    content: '□';
+    position: absolute;
+    left: 0;
+    color: #888;
+    font-size: 11px;
+}
+
+.pre-check-note {
+    font-size: 11px;
+    color: #666;
+    border-top: 1px dashed #ddd;
+    padding-top: 7px;
+    margin-top: 4px;
+    line-height: 1.6;
+}
+
+/* 支払証明案内ボックス */
+.evidence-note {
+    font-size: 11px;
+    color: #444;
+    background: #f0f4fa;
+    border: 1px solid #c5d3e8;
+    border-left: 3px solid #1565C0;
+    border-radius: 2px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.evidence-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.evidence-item {
+    font-size: 11px;
+    font-weight: bold;
+    color: #1565C0;
+    background: #fff;
+    border: 1px solid #c5d3e8;
+    border-radius: 2px;
+    padding: 2px 8px;
+}
+
+.evidence-sep {
+    font-size: 11px;
+    color: #aaa;
+}
+
+/* 発行対象種別グリッド */
+.receipt-type-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.receipt-type-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.tax-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+    min-width: 44px;
+    text-align: center;
+}
+.tax-badge.nontax {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+.tax-badge.taxable {
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffcc80;
+}
+
+.receipt-type-items {
+    color: #222;
+    font-size: 12px;
+}
+
+.invoice-note {
+    font-size: 10px;
+    color: #888;
+    background: #f5f5f5;
+    padding: 1px 6px;
+    border-radius: 2px;
+    border: 1px solid #e0e0e0;
+}
+
+/* 再発行 折りたたみ */
+.reissue-block {
+    border-left: 3px solid #bbb;
+}
+
+/* 再発行アコーディオン */
+.reissue-accordion {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-left: 3px solid #bbb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.reissue-accordion-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 14px;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+    text-align: left;
+    font-family: inherit;
+    line-height: 1.4;
+}
+.reissue-accordion-btn:hover {
+    background: #f5f5f5;
+    color: #1565C0;
+}
+
+.reissue-arrow {
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.reissue-accordion-body {
+    padding: 0 14px 12px 14px;
+    border-top: 1px dashed #ddd;
+}
+
+.reissue-qa {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    background: #f9f9f9;
+    border-radius: 2px;
+    border: 1px solid #e8e8e8;
+}
+/* 但し書きラジオボタン */
+.note-preset-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-bottom: 4px;
+    padding: 8px 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+}
+
+.note-preset-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    color: #333;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.note-preset-label input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.reissue-q {
+    font-size: 11px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 4px;
+}
+.reissue-a {
+    font-size: 11px;
+    color: #555;
+    line-height: 1.7;
+}
+
+/* アラート - コンパクト */
+.alert {
+    padding: 10px 15px;
+    margin-bottom: 12px;
+    border-radius: 3px;
+    border-left: 4px solid;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.alert-warning {
+    border-left-color: #f57c00;
+}
+
+.alert-info {
+    border-left-color: #0288d1;
+}
+
+.alert h3 {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.alert ul {
+    margin-left: 18px;
+    margin-bottom: 6px;
+}
+
+.alert li {
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+.info-box {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 2px;
+    margin-top: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.info-box h4 {
+    margin-bottom: 6px;
+    color: #1565C0;
+    font-size: 13px;
+}
+
+.info-box ul {
+    margin-left: 18px;
+}
+
+.info-box li {
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+/* セクション - タイト */
+.section {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+
+.section h2 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #1565C0;
+    border-bottom: 2px solid #1565C0;
+    padding-bottom: 5px;
+    font-weight: bold;
+}
+
+.subsection-title {
+    font-size: 13px;
+    font-weight: bold;
+    margin: 12px 0 8px 0;
+    color: #444;
+    background-color: #f0f0f0;
+    padding: 4px 8px;
+    border-left: 3px solid #1565C0;
+}
+
+/* フォームグループ - コンパクト */
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    color: #444;
+    font-size: 12px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #1565C0;
+    box-shadow: 0 0 3px rgba(21, 101, 192, 0.3);
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.form-row label {
+    font-weight: normal;
+    margin: 0;
+    min-width: 70px;
+    font-size: 12px;
+}
+
+/* バッジ - コンパクト */
+.required {
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.optional {
+    color: #888;
+    font-weight: normal;
+    font-size: 11px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+.badge-nontax {
+    background-color: #43a047;
+    color: white;
+}
+
+.badge-tax {
+    background-color: #fb8c00;
+    color: white;
+}
+
+.badge-popular {
+    background-color: #e53935;
+    color: white;
+}
+
+/* ヒント - 小さく */
+.hint {
+    color: #666;
+    font-size: 11px;
+    margin-left: 8px;
+    font-weight: normal;
+}
+
+.hint-inline {
+    color: #1565C0;
+    font-size: 11px;
+}
+
+.hint-text {
+    color: #666;
+    font-size: 11px;
+    margin-top: 6px;
+}
+
+small {
+    color: #888;
+    font-size: 11px;
+    display: block;
+    margin-top: 3px;
+    line-height: 1.3;
+}
+
+/* 警告テキスト */
+.warning-text {
+    color: #d32f2f;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.alert-inline {
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+/* アイテムグループ - コンパクト */
+.item-group {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fafafa;
+    border-radius: 2px;
+    border: 1px solid #ddd;
+}
+
+.item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.item-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.item-header label {
+    cursor: pointer;
+    margin: 0;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.item-body {
+    margin-top: 8px;
+    padding-left: 24px;
+}
+
+/* 入力フィールド - number型の矢印を削除 */
+.amount-input {
+    width: 120px;
+    padding: 5px 8px;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    text-align: right;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+}
+
+/* numberタイプの上下矢印を非表示 */
+.amount-input::-webkit-inner-spin-button,
+.amount-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.amount-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.year-input {
+    width: 65px;
+    padding: 5px 6px;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.year-input::-webkit-inner-spin-button,
+.year-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.year-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.month-input {
+    width: 50px;
+    padding: 5px 6px;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.month-input::-webkit-inner-spin-button,
+.month-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.month-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* 合計ボックス - システムライク */
+.total-box {
+    background-color: #e3f2fd;
+    padding: 12px;
+    border-radius: 2px;
+    margin-top: 12px;
+    border: 2px solid #1565C0;
+}
+
+.total-box h3 {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #1565C0;
+    font-weight: bold;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.total-row span:nth-child(2) {
+    font-weight: bold;
+    color: #1565C0;
+    font-family: 'Courier New', monospace;
+}
+
+.total-main {
+    border-top: 2px solid #1565C0;
+    margin-top: 6px;
+    padding-top: 8px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.total-main span:nth-child(2) {
+    color: #d32f2f;
+    font-size: 18px;
+}
+
+/* ラジオグループ - コンパクト */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.radio-group input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* ボタン - システムライク */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 2px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 8px;
+    font-family: inherit;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background-color: #1565C0;
+    color: white;
+}
+
+.btn-success {
+    background-color: #43a047;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #757575;
+    color: white;
+}
+
+.btn-info {
+    background-color: #0288d1;
+    color: white;
+}
+
+.btn-large {
+    font-size: 15px;
+    padding: 10px 20px;
+}
+
+/* 履歴リスト - コンパクト */
+.history-list {
+    background-color: white;
+    border-radius: 2px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    line-height: 1.3;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* ヘルプボタン */
+.help-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.help-button .btn {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    padding: 0;
+}
+
+/* テーブル風のレイアウト */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th, td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .header h1 {
+        font-size: 16px;
+    }
+
+    .section {
+        padding: 12px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .amount-input,
+    .year-input {
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+}
+
+/* プリント用スタイル */
+@media print {
+    body {
+        background-color: white;
+    }
+    
+    .help-button {
+        display: none;
+    }
+}
+
+/* ====== カ月×金額 計算式 ====== */
+.calc-formula {
+    display: none;               /* JS で表示切替 */
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0 4px 0;
+    padding: 7px 12px;
+    background: #e8f0fb;
+    border: 1px solid #90caf9;
+    border-radius: 4px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.calc-label {
+    color: #555;
+    white-space: nowrap;
+}
+
+.calc-box {
+    display: inline-block;
+    min-width: 60px;
+    padding: 2px 10px;
+    background: #fff;
+    border: 1px solid #90caf9;
+    border-radius: 3px;
+    text-align: right;
+    font-weight: bold;
+    color: #1565C0;
+}
+
+.calc-box.calc-total {
+    min-width: 90px;
+    background: #1565C0;
+    color: #fff;
+    border-color: #0d47a1;
+}
+
+/* ====== 発行履歴 拡張スタイル ====== */
+
+.history-empty {
+    color: #888;
+    font-style: italic;
+    padding: 12px 0;
+}
+
+.history-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: #fff;
+    transition: background 0.2s;
+}
+
+.history-item.history-void {
+    background: #f8f8f8;
+    border-color: #bbb;
+    opacity: 0.75;
+}
+
+.history-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    flex: 1;
+    font-size: 12px;
+}
+
+.history-date  { color: #666; }
+.history-issuer { color: #1565C0; font-weight: bold; }
+.history-customer { font-weight: bold; }
+.history-items { color: #444; }
+.history-amount { color: #1a1a1a; font-weight: bold; }
+
+.history-actions {
+    flex-shrink: 0;
+}
+
+/* 有効・無効バッジ */
+.valid-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: bold;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+    border-radius: 2px;
+    padding: 1px 6px;
+}
+
+.void-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: bold;
+    background: #fce4ec;
+    color: #b71c1c;
+    border: 1px solid #ef9a9a;
+    border-radius: 2px;
+    padding: 1px 6px;
+}
+
+/* 無効化理由表示 */
+.void-info {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #b71c1c;
+    background: #fff8f8;
+    border-left: 3px solid #ef9a9a;
+    padding: 4px 8px;
+    border-radius: 0 2px 2px 0;
+}
+
+/* 無効化ボタン */
+.btn-void {
+    font-size: 11px;
+    padding: 3px 10px;
+    background: #fff;
+    color: #c62828;
+    border: 1px solid #e57373;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.btn-void:hover {
+    background: #c62828;
+    color: #fff;
+}
+
+/* 無効化済み行の打ち消し線 */
+.history-void .history-customer,
+.history-void .history-items,
+.history-void .history-amount {
+    text-decoration: line-through;
+    color: #999;
+}
