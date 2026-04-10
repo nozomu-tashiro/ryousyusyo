@@ -3,6 +3,7 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.lib.colors import HexColor
 from reportlab.lib.utils import ImageReader
 import os
@@ -12,18 +13,33 @@ from datetime import datetime
 _DATA_DIR = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH', os.path.dirname(os.path.abspath(__file__)))
 _PDF_DIR  = os.path.join(_DATA_DIR, 'pdfs')
 
-# 日本語フォントの登録
+# 日本語フォントの登録（複数パスを試行 → CIDフォントにフォールバック）
 def register_fonts():
+    font_paths = [
+        # Ubuntu/Debian系（Railway環境）
+        '/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf',
+        '/usr/share/fonts/truetype/ipafont-gothic/ipag.ttf',
+        '/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf',
+        '/usr/share/fonts/ipa-gothic/ipag.ttf',
+        # その他
+        '/usr/share/fonts/truetype/fonts-japanese-gothic.ttf',
+        '/usr/share/fonts/truetype/takao-gothic/TakaoGothic.ttf',
+        '/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf',
+    ]
+    for path in font_paths:
+        if os.path.exists(path):
+            try:
+                pdfmetrics.registerFont(TTFont('IPAGothic', path))
+                return 'ttf'
+            except:
+                continue
+    # TTFが見つからない場合はReportLab内蔵CIDフォント（HeiseiKakuGo-W5）を使用
     try:
-        pdfmetrics.registerFont(TTFont('IPAGothic', '/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf'))
-        pdfmetrics.registerFont(TTFont('IPAMincho', '/usr/share/fonts/opentype/ipafont-mincho/ipam.ttf'))
-        return True
+        pdfmetrics.registerFont(UnicodeCIDFont('HeiseiKakuGo-W5'))
+        return 'cid'
     except:
-        try:
-            pdfmetrics.registerFont(TTFont('Japanese', '/usr/share/fonts/truetype/fonts-japanese-gothic.ttf'))
-            return True
-        except:
-            return False
+        pass
+    return False
 
 def format_currency(amount):
     """金額をカンマ区切りでフォーマット"""
@@ -33,8 +49,13 @@ def generate_receipt_pdf(data):
     """領収書PDFを生成"""
     
     # フォント登録
-    font_available = register_fonts()
-    font_name = 'IPAGothic' if font_available else 'Helvetica'
+    font_result = register_fonts()
+    if font_result == 'ttf':
+        font_name = 'IPAGothic'
+    elif font_result == 'cid':
+        font_name = 'HeiseiKakuGo-W5'
+    else:
+        font_name = 'Helvetica'
     
     # PDFファイル名
     receipt_number = data['receipt_number']
