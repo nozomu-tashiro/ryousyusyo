@@ -13,7 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p pdfs
+RUN mkdir -p pdfs && chmod +x start.sh
 
-# シェル形式でCMDを記述することで$PORT変数が展開される
-CMD ["/bin/sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 120 --log-level info"]
+CMD ["./start.sh"]
