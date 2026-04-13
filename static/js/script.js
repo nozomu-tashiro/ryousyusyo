@@ -44,7 +44,7 @@ function updateNoteLabels() {
         { id: 'noteLabel0', suffix: '初回保証料として' },
         { id: 'noteLabel1', suffix: '更新保証料として' },
         { id: 'noteLabel2', suffix: '月額保証料として' },
-        { id: 'noteLabel3', suffix: '家賃保証料として' }
+        { id: 'noteLabel3', suffix: '家賃保証料等として' }
         // noteLabel4（自由記載）は変更しない
     ];
 
