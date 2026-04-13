@@ -123,40 +123,58 @@ def generate_receipt_pdf(data):
     c.drawRightString(logo_right, title_y - 13*mm, f"再発行日: {data['issue_date']}")
 
     # ── 宛名ブロック（枠内5mm余白から開始・左側） ──
-    # 枠内上端 = FRAME_TOP - 5mm、宛名テキスト先頭をそこから3mm内側
-    addr_top = FRAME_TOP - 5*mm - 3*mm      # 宛名「○○ 様」の y座標
-
-    # お客様名
-    c.setFillColor(HexColor('#000000'))
-    c.setFont(font_name, 13)
-    c.drawString(INNER_L, addr_top, f"{data['customer_name']} 様")
+    # 順番: 郵便番号 → 住所 → 物件名・号室 → 契約者名様 → 保証番号
+    addr_top = FRAME_TOP - 5*mm - 3*mm      # 宛名ブロック先頭の y座標
 
     # 郵便番号
+    c.setFillColor(HexColor('#000000'))
     c.setFont(font_name, 9)
-    c.drawString(INNER_L, addr_top - 7*mm, f"〒{data['postal_code']}")
+    c.drawString(INNER_L, addr_top, f"〒{data['postal_code']}")
 
     # 住所
-    c.drawString(INNER_L, addr_top - 12*mm, data['address'])
+    c.drawString(INNER_L, addr_top - 6*mm, data['address'])
 
     # 物件名・号室
+    addr_y_after_address = addr_top - 12*mm
     if data.get('building_room'):
-        c.drawString(INNER_L, addr_top - 17*mm, data['building_room'])
+        c.drawString(INNER_L, addr_y_after_address, data['building_room'])
+        name_y = addr_top - 19*mm
+    else:
+        name_y = addr_top - 12*mm
+
+    # お客様名（大きめフォント）
+    c.setFillColor(HexColor('#000000'))
+    c.setFont(font_name, 13)
+    c.drawString(INNER_L, name_y, f"{data['customer_name']} 様")
 
     # 保証番号
     if data.get('guarantee_number'):
         c.setFont(font_name, 8)
         c.setFillColor(gray_color)
-        c.drawString(INNER_L, addr_top - 23*mm, f"保証番号: {data['guarantee_number']}")
+        c.drawString(INNER_L, name_y - 7*mm, f"保証番号: {data['guarantee_number']}")
 
     # =========================================================
     # === 中段（折り目より下・明細エリア）===
     #     「下記の通り〜」は上段下端(折り目)のすぐ下から開始
     # =========================================================
 
+    # ── 契約者名（大きめ・「下記の通り」の直上） ──
+    c.setFillColor(HexColor('#000000'))
+    c.setFont(font_name, 14)
+    name_line_y = PANEL_A_BOTTOM - 5*mm
+    # 下線（名前の幅に合わせる）
+    name_str = f"{data['customer_name']} 様"
+    name_w = c.stringWidth(name_str, font_name, 14)
+    # 下線を先に描画（名前テキストより少し幅広に）
+    c.setStrokeColor(HexColor('#000000'))
+    c.setLineWidth(0.8)
+    c.line(INNER_L, name_line_y - 2*mm, INNER_L + name_w + 4*mm, name_line_y - 2*mm)
+    c.drawString(INNER_L, name_line_y, name_str)
+
     # 「下記の通り領収いたしました。」
     c.setFillColor(HexColor('#000000'))
     c.setFont(font_name, 10)
-    c.drawString(INNER_L, PANEL_A_BOTTOM - 8*mm, "下記の通り領収いたしました。")
+    c.drawString(INNER_L, PANEL_A_BOTTOM - 13*mm, "下記の通り領収いたしました。")
 
     # === 金額ボックス（目立つデザイン） ===
     y_pos = PANEL_A_BOTTOM - 20*mm

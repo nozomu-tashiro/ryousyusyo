@@ -151,7 +151,8 @@
                     物件名・号室 <span class="optional">任意</span>
                     <span class="hint">💡建物名と部屋番号</span>
                 </label>
-                <input type="text" id="buildingRoom" placeholder="ハイツ代々木101号室" class="form-control">
+                <input type="text" id="buildingRoom" placeholder="ハイツ代々木101号室" class="form-control"
+                    oninput="updateNoteLabels();">
             </div>
         </div>
 
@@ -380,36 +381,36 @@
 
             <div class="form-group">
                 <label>但し書き</label>
-                <div class="note-preset-group">
+                <div class="note-preset-group" id="notePresetGroup">
                     <label class="note-preset-label">
-                        <input type="radio" name="notePreset" value="家賃保証料として" checked
-                            onchange="document.getElementById('customNote').value='';">
-                        家賃保証料として
+                        <input type="radio" name="notePreset" data-template="{物件名}の初回保証料として" checked
+                            onchange="document.getElementById('customNote').value=''; updateNoteLabels();">
+                        <span class="note-label-text" id="noteLabel0">初回保証料として</span>
                     </label>
                     <label class="note-preset-label">
-                        <input type="radio" name="notePreset" value="更新保証料として"
-                            onchange="document.getElementById('customNote').value='';">
-                        更新保証料として
+                        <input type="radio" name="notePreset" data-template="{物件名}の更新保証料として"
+                            onchange="document.getElementById('customNote').value=''; updateNoteLabels();">
+                        <span class="note-label-text" id="noteLabel1">更新保証料として</span>
                     </label>
                     <label class="note-preset-label">
-                        <input type="radio" name="notePreset" value="月額保証料として"
-                            onchange="document.getElementById('customNote').value='';">
-                        月額保証料として
+                        <input type="radio" name="notePreset" data-template="{物件名}の月額保証料として"
+                            onchange="document.getElementById('customNote').value=''; updateNoteLabels();">
+                        <span class="note-label-text" id="noteLabel2">月額保証料として</span>
                     </label>
                     <label class="note-preset-label">
-                        <input type="radio" name="notePreset" value="家賃保証料等として"
-                            onchange="document.getElementById('customNote').value='';">
-                        家賃保証料等として
+                        <input type="radio" name="notePreset" data-template="{物件名}の家賃保証料として"
+                            onchange="document.getElementById('customNote').value=''; updateNoteLabels();">
+                        <span class="note-label-text" id="noteLabel3">家賃保証料として</span>
                     </label>
                     <label class="note-preset-label">
-                        <input type="radio" name="notePreset" value="custom">
-                        自由入力 ↓
+                        <input type="radio" name="notePreset" data-template="custom">
+                        <span class="note-label-text" id="noteLabel4">自由記載 ↓</span>
                     </label>
                 </div>
                 <input type="text" id="customNote" class="form-control" 
-                    placeholder="自由入力を選択して、ここに文言を入力してください"
+                    placeholder="自由記載を選択して、ここに文言を入力してください"
                     style="margin-top:6px;"
-                    onfocus="document.querySelector('input[name=notePreset][value=custom]').checked=true;">
+                    onfocus="document.querySelector('input[name=notePreset][data-template=custom]').checked=true;">
             </div>
 
             <div class="form-group">
