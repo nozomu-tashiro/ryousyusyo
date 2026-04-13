@@ -34,6 +34,28 @@ function handleNoteChange() {
     // ラジオボタン方式に変更済みのため処理なし
 }
 
+// 但し書きラベルに物件名・号室を自動反映する
+function updateNoteLabels() {
+    const building = document.getElementById('buildingRoom').value.trim();
+    // 物件名が入力されていれば「物件名の〇〇」、未入力なら「〇〇」のみ
+    const prefix = building ? building + 'の' : '';
+
+    const templates = [
+        { id: 'noteLabel0', suffix: '初回保証料として' },
+        { id: 'noteLabel1', suffix: '更新保証料として' },
+        { id: 'noteLabel2', suffix: '月額保証料として' },
+        { id: 'noteLabel3', suffix: '家賃保証料として' }
+        // noteLabel4（自由記載）は変更しない
+    ];
+
+    templates.forEach(function(t) {
+        const el = document.getElementById(t.id);
+        if (el) {
+            el.textContent = prefix + t.suffix;
+        }
+    });
+}
+
 // チェックボックスのセットアップ
 function setupCheckboxListeners() {
     const checkboxes = ['Initial', 'Monthly', 'Renewal', 'Collection', 'Billing'];
@@ -148,7 +170,7 @@ function collectFormData() {
     const selectedPreset = document.querySelector('input[name="notePreset"]:checked');
     const customNoteVal = document.getElementById('customNote').value.trim();
 
-    if (!selectedPreset || selectedPreset.value === 'custom') {
+    if (!selectedPreset || selectedPreset.dataset.template === 'custom') {
         // 自由入力が選択されている場合
         if (!customNoteVal) {
             alert('但し書きを入力してください（自由入力欄に文言を入力してください）');
@@ -160,7 +182,15 @@ function collectFormData() {
         // プリセット選択中でも自由入力欄に何か書いてあればそちらを優先
         noteText = customNoteVal;
     } else {
-        noteText = selectedPreset.value;
+        // data-template の {物件名} を実際の入力値に置換
+        const building = document.getElementById('buildingRoom').value.trim();
+        const template = selectedPreset.dataset.template || '';
+        if (building) {
+            noteText = template.replace('{物件名}', building);
+        } else {
+            // 物件名未入力時は「{物件名}の」の部分を除去
+            noteText = template.replace('{物件名}の', '');
+        }
     }
     
     const data = {
